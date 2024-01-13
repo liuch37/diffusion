@@ -1,8 +1,10 @@
-# diffusion
+# Diffusion
 A basic diffusion model pipeline. Build on top of https://github.com/cloneofsimo/minDiffusion/tree/master.
 
-# installation
+# Installation
 
-# train
+# Data Preparation
 
-# inference
+# Train
+
+# Inference
