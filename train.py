@@ -68,4 +68,4 @@ def train_cifar10(
 
 
 if __name__ == "__main__":
-    train_cifar10(100, 'cpu', None)
+    train_cifar10(100, 'mps', None)
