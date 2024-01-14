@@ -15,9 +15,11 @@ pip install torch torchvision torchaudio
 
 # Data Preparation
 1. CIFAR10
+
 No preparation needed.
 
 2. Customized dataset
+
 Download your own images into ```./data```.
 
 # Train
