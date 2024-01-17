@@ -13,6 +13,11 @@ conda activate diffusion
 pip install torch torchvision torchaudio
 ```
 
+3. Install additional libraries.
+```
+pip install tqdm
+```
+
 # Data Preparation
 1. CIFAR10
 

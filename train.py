@@ -1,6 +1,7 @@
 from typing import Dict, Optional, Tuple
 from sympy import Ci
 from tqdm import tqdm
+import pdb
 
 import torch
 import torch.nn as nn
@@ -35,7 +36,7 @@ def train_cifar10(
         transform=tf,
     )
 
-    dataloader = DataLoader(dataset, batch_size=512, shuffle=True, num_workers=16)
+    dataloader = DataLoader(dataset, batch_size=512, shuffle=True, num_workers=8)
     optim = torch.optim.Adam(ddpm.parameters(), lr=1e-5)
 
     for i in range(n_epoch):
@@ -44,7 +45,7 @@ def train_cifar10(
 
         pbar = tqdm(dataloader)
         loss_ema = None
-        for x, _ in pbar:
+        for x, y in pbar:
             optim.zero_grad()
             x = x.to(device)
             loss = ddpm(x)
@@ -68,4 +69,4 @@ def train_cifar10(
 
 
 if __name__ == "__main__":
-    train_cifar10(100, "mps", None)
+    train_cifar10(n_epoch=100, device="mps", load_pth=None)
