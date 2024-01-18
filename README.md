@@ -21,7 +21,7 @@ pip install tqdm
 # Data Preparation
 1. CIFAR10
 
-No preparation needed. Simply create ```./contents``` and ```./models``` folders.
+No preparation needed.
 
 2. Customized dataset
 
