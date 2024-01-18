@@ -25,17 +25,12 @@ No preparation needed. Simply create ```./contents``` and ```./models``` folders
 
 2. Customized dataset
 
-Download your own images into ```./data```.
+Download your own images into ```./data``` and write your customized data loader.
 
 # Train
 Run the below commad.
 ```
 python train.py
-```
-
-Run the below command for MacOS M1.
-```
-PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.0 python train.py
 ```
 
 # Inference

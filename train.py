@@ -1,6 +1,6 @@
 from typing import Dict, Optional, Tuple
-from sympy import Ci
 from tqdm import tqdm
+import os
 import pdb
 
 import torch
@@ -69,4 +69,6 @@ def train_cifar10(
 
 
 if __name__ == "__main__":
-    train_cifar10(n_epoch=100, device="mps", load_pth=None)
+    os.makedirs('contents',exist_ok=True)
+    os.makedirs('models', exist_ok=True)
+    train_cifar10(n_epoch=100, device="cuda", load_pth=None)
