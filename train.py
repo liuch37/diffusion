@@ -65,7 +65,7 @@ def train_cifar10(
             save_image(grid, f"./contents/ddpm_sample_cifar{i}.png")
 
             # save model
-            torch.save(ddpm.state_dict(), f"./models/ddpm_cifar10.pth")
+            torch.save(ddpm.state_dict(), f"./models/ddpm_cifar.pth")
 
 
 if __name__ == "__main__":

@@ -28,5 +28,14 @@ No preparation needed. Simply create ```./contents``` and ```./models``` folders
 Download your own images into ```./data```.
 
 # Train
+Run the below commad.
+```
+python train.py
+```
+
+Run the below command for MacOS M1.
+```
+PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.0 python train.py
+```
 
 # Inference
