@@ -36,7 +36,7 @@ def train_cifar10(
         transform=tf,
     )
 
-    dataloader = DataLoader(dataset, batch_size=512, shuffle=True, num_workers=8)
+    dataloader = DataLoader(dataset, batch_size=128, shuffle=True, num_workers=8)
     optim = torch.optim.Adam(ddpm.parameters(), lr=1e-5)
 
     for i in range(n_epoch):
@@ -61,7 +61,7 @@ def train_cifar10(
         with torch.no_grad():
             xh = ddpm.sample(8, (3, 32, 32), device)
             xset = torch.cat([xh, x[:8]], dim=0)
-            grid = make_grid(xset, normalize=True, value_range=(-1, 1), nrow=4)
+            grid = make_grid(xset, normalize=True, nrow=4)
             save_image(grid, f"./contents/ddpm_sample_cifar_{i}.png")
 
             # save model

@@ -1,5 +1,4 @@
 from typing import Dict, Optional, Tuple
-from sympy import Ci
 from tqdm import tqdm
 import os
 
@@ -13,23 +12,30 @@ from torchvision.utils import save_image, make_grid
 
 from mindiffusion.unet import NaiveUnet
 from mindiffusion.ddpm import DDPM
+from mindiffusion.ddim import DDIM
 
 def inference(
-    save_path: str = "./contents", samples: int = 8, device: str = "cuda:0", load_path: str = "ddpm.pth"
+    save_path: str = "./generations", samples: int = 8, device: str = "cuda:0", load_path: str = "ddpm.pth", sampler: str = 'ddpm'
 ) -> None:
 
-    ddpm = DDPM(eps_model=NaiveUnet(3, 3, n_feat=128), betas=(1e-4, 0.02), n_T=1000)
+    if sampler == 'ddpm':
+        model = DDPM(eps_model=NaiveUnet(3, 3, n_feat=128), betas=(1e-4, 0.02), n_T=1000)
+    elif sampler == 'ddim':
+        model = DDIM(eps_model=NaiveUnet(3, 3, n_feat=128), betas=(1e-4, 0.02), n_T=10)
+    else:
+        print("Sampler not supported.")
+        exit(-1)
 
-    ddpm.load_state_dict(torch.load(load_path))
+    model.load_state_dict(torch.load(load_path))
 
-    ddpm.to(device)
+    model.to(device)
 
-    ddpm.eval()
+    model.eval()
     with torch.no_grad():
-        xh = ddpm.sample(samples, (3, 32, 32), device)
-        xset = torch.cat([xh, x[:samples]], dim=0)
-        grid = make_grid(xset, normalize=True, value_range=(-1, 1), nrow=4)
-        save_image(grid, os.path.join(save_path, 'sample_'+str(i)+'.png'))
+        xh = model.sample(samples, (3, 32, 32), device)
+        grid = make_grid(xh, normalize=True, nrow=4)
+        save_image(grid, os.path.join(save_path, 'sample.png'))
 
 if __name__ == "__main__":
-    inference(save_path="./contents", samples=8, device="mps", load_path="ddpm.pth")
+    os.makedirs('generations',exist_ok=True)
+    inference(save_path="./generations", samples=8, device="cuda", load_path="./models/ddpm_cifar.pth", sampler='ddpm')
