@@ -62,7 +62,7 @@ def train_cifar10(
             xh = ddpm.sample(8, (3, 32, 32), device)
             xset = torch.cat([xh, x[:8]], dim=0)
             grid = make_grid(xset, normalize=True, value_range=(-1, 1), nrow=4)
-            save_image(grid, f"./contents/ddpm_sample_cifar{i}.png")
+            save_image(grid, f"./contents/ddpm_sample_cifar_{i}.png")
 
             # save model
             torch.save(ddpm.state_dict(), f"./models/ddpm_cifar.pth")
