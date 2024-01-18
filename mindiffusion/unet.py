@@ -5,6 +5,32 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+class EmbedFC(nn.Module):
+    def __init__(self, input_dim, emb_dim):
+        super(EmbedFC, self).__init__()
+        '''
+        This class defines a generic one layer feed-forward neural network for embedding input data of
+        dimensionality input_dim to an embedding space of dimensionality emb_dim.
+
+        Code reference: https://github.com/hanyun2019/difussion-model-code-implementation/blob/dm-project-haowen-mac/diffusion_utilities.py
+        '''
+        self.input_dim = input_dim
+
+        # define the layers for the network
+        layers = [
+            nn.Linear(input_dim, emb_dim),
+            nn.GELU(),
+            nn.Linear(emb_dim, emb_dim),
+        ]
+
+        # create a PyTorch sequential model consisting of the defined layers
+        self.model = nn.Sequential(*layers)
+
+    def forward(self, x):
+        # flatten the input tensor
+        x = x.view(-1, self.input_dim)
+        # apply the model layers to the flattened tensor
+        return self.model(x)
 
 class Conv3(nn.Module):
     def __init__(
@@ -121,6 +147,64 @@ class NaiveUnet(nn.Module):
         thro = self.up0(thro + temb)
 
         up1 = self.up1(thro, down3) + temb
+        up2 = self.up2(up1, down2)
+        up3 = self.up3(up2, down1)
+
+        out = self.out(torch.cat((up3, x), 1))
+
+        return out
+
+class ContextUnet(nn.Module):
+    def __init__(self, in_channels: int, out_channels: int, n_feat: int = 256, nc_feat: int = 10) -> None:
+        super(ContextUnet, self).__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+
+        self.n_feat = n_feat
+        self.nc_feat = nc_feat
+
+        self.init_conv = Conv3(in_channels, n_feat, is_res=True)
+
+        self.down1 = UnetDown(n_feat, n_feat)
+        self.down2 = UnetDown(n_feat, 2 * n_feat)
+        self.down3 = UnetDown(2 * n_feat, 2 * n_feat)
+
+        self.to_vec = nn.Sequential(nn.AvgPool2d(4), nn.ReLU())
+
+        self.timeembed = TimeSiren(2 * n_feat)
+        self.contextembed = EmbedFC(nc_feat, 2 * n_feat)
+
+        self.up0 = nn.Sequential(
+            nn.ConvTranspose2d(2 * n_feat, 2 * n_feat, 4, 4),
+            nn.GroupNorm(8, 2 * n_feat),
+            nn.ReLU(),
+        )
+
+        self.up1 = UnetUp(4 * n_feat, 2 * n_feat)
+        self.up2 = UnetUp(4 * n_feat, n_feat)
+        self.up3 = UnetUp(2 * n_feat, n_feat)
+        self.out = nn.Conv2d(2 * n_feat, self.out_channels, 3, 1, 1)
+
+    def forward(self, x: torch.Tensor, t: torch.Tensor, c: torch.Tensor) -> torch.Tensor:
+
+        x = self.init_conv(x)
+
+        down1 = self.down1(x)
+        down2 = self.down2(down1)
+        down3 = self.down3(down2)
+
+        thro = self.to_vec(down3)
+
+        # mask out context if context_mask == 1
+        if c is None:
+            c = torch.zeros(x.shape[0], self.nc_feat).to(x)
+
+        cemb = self.contextembed(c).view(-1, self.n_feat * 2, 1, 1)     # (batch, 2*n_feat, 1,1)
+        temb = self.timeembed(t).view(-1, self.n_feat * 2, 1, 1)
+
+        thro = self.up0(cemb*thro + temb)
+
+        up1 = self.up1(cemb*thro, down3) + temb
         up2 = self.up2(up1, down2)
         up3 = self.up3(up2, down1)
 
