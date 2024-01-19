@@ -47,3 +47,10 @@ python inference.py
 2. DDPM 1000 steps CIFAR10 with one-hot encoding conditions and trained with 100 epochs.
 
 3. DDPM 1000 steps CIFAR10 with text embedding conditions and trained with 100 epochs.
+
+# Checkpoints
+1. DDPM without conditions trained with 100 epochs on CIFAR10.
+
+2. DDPM with one-hot encoding class condition and trained with 100 epochs on CIFAR10.
+
+3. DDPM with text embedding class condition and trained with 100 epochs on CIFAR10.
