@@ -11,17 +11,18 @@ from torchvision.datasets import CIFAR10
 from torchvision import transforms
 from torchvision.utils import save_image, make_grid
 
-from mindiffusion.unet import NaiveUnet
-from mindiffusion.ddpm import DDPM
+from mindiffusion.unet import NaiveUnet, ContextUnet
+from mindiffusion.ddpm import DDPM, DDPM_Context
 
 def train_cifar10(
     n_epoch: int = 100, device: str = "cuda:0", load_pth: Optional[str] = None
 ) -> None:
 
-    ddpm = DDPM(eps_model=NaiveUnet(3, 3, n_feat=128), betas=(1e-4, 0.02), n_T=1000)
+    #ddpm = DDPM(eps_model=NaiveUnet(3, 3, n_feat=128), betas=(1e-4, 0.02), n_T=1000)
+    ddpm = DDPM_Context(eps_model=ContextUnet(3, 3, n_feat=128, encoding='onehot', nc_feat=10), betas=(1e-4, 0.02), n_T=1000)
 
     if load_pth is not None:
-        ddpm.load_state_dict(torch.load("ddpm_cifar.pth"))
+        ddpm.load_state_dict(torch.load(load_pth))
 
     ddpm.to(device)
 
@@ -48,7 +49,8 @@ def train_cifar10(
         for x, y in pbar:
             optim.zero_grad()
             x = x.to(device)
-            loss = ddpm(x)
+            y = y.to(device)
+            loss = ddpm(x, y)
             loss.backward()
             if loss_ema is None:
                 loss_ema = loss.item()
@@ -61,11 +63,11 @@ def train_cifar10(
         with torch.no_grad():
             xh = ddpm.sample(8, (3, 32, 32), device)
             xset = torch.cat([xh, x[:8]], dim=0)
-            grid = make_grid(xset, normalize=True, nrow=4)
+            grid = make_grid(xset, normalize=True, range=(-1, 1), nrow=4) # difference torchvision version can use 'value_range' instead of 'range'
             save_image(grid, f"./contents/ddpm_sample_cifar_{i}.png")
 
             # save model
-            torch.save(ddpm.state_dict(), f"./models/ddpm_cifar.pth")
+            torch.save(ddpm.state_dict(), f"./models/ddpm_context_cifar.pth")
 
 
 if __name__ == "__main__":

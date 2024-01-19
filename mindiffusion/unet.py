@@ -154,26 +154,14 @@ class NaiveUnet(nn.Module):
 
         return out
 
-def text_feature_extractor(text):
-    '''
-    Extract text feature through 1) One-hot encoding and 2) CLIP encoder.
-    Ref: https://github.com/openai/CLIP
-
-    Input:
-    text: torch tensor with shape (batch, text)
-    Output:
-    feature: torch tensor with shape (batch, number of features)
-    '''
-
-    return
-
 class ContextUnet(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int, n_feat: int = 256, nc_feat: int = 10) -> None:
+    def __init__(self, in_channels: int, out_channels: int, n_feat: int = 256, encoding: str = 'onehot', nc_feat: int = 10) -> None:
         super(ContextUnet, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
 
         self.n_feat = n_feat
+        self.encoding = encoding
         self.nc_feat = nc_feat
 
         self.init_conv = Conv3(in_channels, n_feat, is_res=True)
@@ -184,8 +172,10 @@ class ContextUnet(nn.Module):
 
         self.to_vec = nn.Sequential(nn.AvgPool2d(4), nn.ReLU())
 
-        self.timeembed = TimeSiren(2 * n_feat)
-        self.contextembed = EmbedFC(nc_feat, 2 * n_feat)
+        self.timeembed1 = TimeSiren(2 * n_feat)
+        self.timeembed2 = TimeSiren(1 * n_feat)
+        self.contextembed1 = EmbedFC(nc_feat, 2 * n_feat)
+        self.contextembed2 = EmbedFC(nc_feat, 1 * n_feat)
 
         self.up0 = nn.Sequential(
             nn.ConvTranspose2d(2 * n_feat, 2 * n_feat, 4, 4),
@@ -198,9 +188,33 @@ class ContextUnet(nn.Module):
         self.up3 = UnetUp(2 * n_feat, n_feat)
         self.out = nn.Conv2d(2 * n_feat, self.out_channels, 3, 1, 1)
 
+    def text_feature_extractor(self, label):
+        '''
+        Extract text feature through 1) One-hot encoding and 2) CLIP encoder.
+        Ref: https://github.com/openai/CLIP
+
+        Input:
+        label: torch tensor with shape (batch, )
+        encoding: string options of ['onehot', 'clip']
+
+        Output:
+        feature: torch tensor with shape (batch, number of features)
+        '''
+
+        if self.encoding == 'onehot':
+            vec = F.one_hot(label, self.nc_feat).float()
+        elif self.encoding == 'clip':
+            pass
+        else:
+            print("Encoding method not supported.")
+            exit(-1)
+
+        return vec
+
     def forward(self, x: torch.Tensor, t: torch.Tensor, c: torch.Tensor) -> torch.Tensor:
 
         x = self.init_conv(x)
+        c = self.text_feature_extractor(c)
 
         down1 = self.down1(x)
         down2 = self.down2(down1)
@@ -212,14 +226,16 @@ class ContextUnet(nn.Module):
         if c is None:
             c = torch.zeros(x.shape[0], self.nc_feat).to(x)
 
-        cemb = self.contextembed(c).view(-1, self.n_feat * 2, 1, 1)     # (batch, 2*n_feat, 1,1)
-        temb = self.timeembed(t).view(-1, self.n_feat * 2, 1, 1)
+        cemb1 = self.contextembed1(c).view(-1, self.n_feat * 2, 1, 1)     # (batch, 2*n_feat, 1,1)
+        temb1 = self.timeembed1(t).view(-1, self.n_feat * 2, 1, 1)
+        cemb2 = self.contextembed2(c).view(-1, self.n_feat * 1, 1, 1)
+        temb2 = self.timeembed2(t).view(-1, self.n_feat * 1, 1, 1)
 
-        thro = self.up0(cemb*thro + temb)
+        thro = self.up0(thro)
 
-        up1 = self.up1(cemb*thro, down3) + temb
+        up1 = self.up1(cemb1*thro, down3) + temb1
         up2 = self.up2(up1, down2)
-        up3 = self.up3(up2, down1)
+        up3 = self.up3(cemb2*up2, down1) + temb2
 
         out = self.out(torch.cat((up3, x), 1))
 
