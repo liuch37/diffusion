@@ -12,19 +12,12 @@ from torchvision.utils import save_image, make_grid
 
 from mindiffusion.unet import NaiveUnet
 from mindiffusion.ddpm import DDPM
-from mindiffusion.ddim import DDIM
 
 def inference(
     save_path: str = "./generations", samples: int = 8, device: str = "cuda:0", load_path: str = "ddpm.pth", sampler: str = 'ddpm'
 ) -> None:
 
-    if sampler == 'ddpm':
-        model = DDPM(eps_model=NaiveUnet(3, 3, n_feat=128), betas=(1e-4, 0.02), n_T=1000)
-    elif sampler == 'ddim':
-        model = DDIM(eps_model=NaiveUnet(3, 3, n_feat=128), betas=(1e-4, 0.02), n_T=10)
-    else:
-        print("Sampler not supported.")
-        exit(-1)
+    model = DDPM(eps_model=NaiveUnet(3, 3, n_feat=128), betas=(1e-4, 0.02), n_T=1000)
 
     model.load_state_dict(torch.load(load_path))
 
@@ -38,4 +31,4 @@ def inference(
 
 if __name__ == "__main__":
     os.makedirs('generations',exist_ok=True)
-    inference(save_path="./generations", samples=8, device="cuda", load_path="./models/ddpm_cifar.pth", sampler='ddpm')
+    inference(save_path="./generations", samples=16, device="cuda", load_path="./models/ddpm_cifar.pth", sampler='ddpm')

@@ -34,14 +34,16 @@ python train.py
 ```
 
 # Inference
-Run the below command. You can specify different sampling schemes and models.
+Run the below command.
 ```
 python inference.py
 ```
 
 # Results
-1. DDPM 1000 steps CIFAR10 without conditions trained 100 epochs.
+1. DDPM 1000 steps CIFAR10 without conditions and trained with 100 epochs.
+
 ![Generated images](https://github.com/liuch37/diffusion/blob/main/misc/ddpm_sample_cifar_99_naiveunet.png)
 
-2. DDIM 10 steps CIFAR10 without conditions trained with 100 epochs.
-![Generated images](https://github.com/liuch37/diffusion/blob/main/misc/ddim_sample_cifar_99_naiveunet.png)
+2. DDPM 1000 steps CIFAR10 with one-hot encoding conditions and trained with 100 epochs.
+
+3. DDPM 1000 steps CIFAR10 with text embedding conditions and trained with 100 epochs.
