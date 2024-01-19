@@ -154,6 +154,19 @@ class NaiveUnet(nn.Module):
 
         return out
 
+def text_feature_extractor(text):
+    '''
+    Extract text feature through 1) One-hot encoding and 2) CLIP encoder.
+    Ref: https://github.com/openai/CLIP
+
+    Input:
+    text: torch tensor with shape (batch, text)
+    Output:
+    feature: torch tensor with shape (batch, number of features)
+    '''
+
+    return
+
 class ContextUnet(nn.Module):
     def __init__(self, in_channels: int, out_channels: int, n_feat: int = 256, nc_feat: int = 10) -> None:
         super(ContextUnet, self).__init__()

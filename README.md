@@ -15,7 +15,7 @@ pip install torch torchvision torchaudio
 
 3. Install additional libraries.
 ```
-pip install tqdm
+pip install tqdm openai-clip
 ```
 
 # Data Preparation
