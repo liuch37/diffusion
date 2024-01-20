@@ -44,13 +44,15 @@ python inference.py
 
 ![Generated images](https://github.com/liuch37/diffusion/blob/main/misc/ddpm_sample_cifar_99_naiveunet.png)
 
-2. DDPM 1000 steps CIFAR10 with one-hot encoding conditions and trained with 100 epochs.
+2. DDPM 1000 steps CIFAR10 with one-hot encoding class conditions and trained with 100 epochs.
 
-3. DDPM 1000 steps CIFAR10 with text embedding conditions and trained with 100 epochs.
+![Generated images](https://github.com/liuch37/diffusion/blob/main/misc/ddpm_sample_cifar_99_contextunet.png)
+
+3. DDPM 1000 steps CIFAR10 with text embedding class conditions and trained with 100 epochs.
 
 # Checkpoints
 1. DDPM without conditions trained with 100 epochs on CIFAR10.
 
-2. DDPM with one-hot encoding class condition and trained with 100 epochs on CIFAR10.
+2. DDPM with one-hot encoding class conditions and trained with 100 epochs on CIFAR10.
 
-3. DDPM with text embedding class condition and trained with 100 epochs on CIFAR10.
+3. DDPM with text embedding class conditions and trained with 100 epochs on CIFAR10.
