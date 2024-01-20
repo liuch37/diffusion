@@ -44,7 +44,7 @@ python inference.py
 
 ![Generated images](https://github.com/liuch37/diffusion/blob/main/misc/ddpm_sample_cifar_99_naiveunet.png)
 
-2. DDPM 1000 steps CIFAR10 with one-hot encoding class conditions and trained with 100 epochs.
+2. DDPM 1000 steps CIFAR10 with one-hot encoding class conditions and trained with 100 epochs. The first to last row is conditioned on 'automobile', 'cat', 'dog', and 'ship', respectively.
 
 ![Generated images](https://github.com/liuch37/diffusion/blob/main/misc/ddpm_sample_cifar_99_contextunet.png)
 
