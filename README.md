@@ -1,5 +1,5 @@
 # Diffusion
-A basic diffusion model - Denoising Diffusion Probabilistic Models (DDPM) pipeline. Build on top of https://github.com/cloneofsimo/minDiffusion/tree/master.
+A basic diffusion model from scratch - Denoising Diffusion Probabilistic Models (DDPM) pipeline. Build on top of https://github.com/cloneofsimo/minDiffusion/tree/master. Note it supports both DDPM with and without additional conditions (e.g. text information).
 
 # Installation
 1. Create a conda environment.
@@ -28,13 +28,13 @@ No preparation needed.
 Download your own images into ```./data``` and write your customized data loader.
 
 # Train
-Run the below commad. You can specify different models (NaiveUnet, ContextUnet) and other hyperparamters.
+Run the below commad. You can specify different models (NaiveUnet, ContextUnet) and hyperparamters inside.
 ```
 python train.py
 ```
 
 # Inference
-Run the below command.
+Run the below command. You can specify different models (NaiveUnet, ContextUnet) and hyperparamters inside.
 ```
 python inference.py
 ```
@@ -50,9 +50,17 @@ python inference.py
 
 3. DDPM 1000 steps CIFAR10 with text embedding class conditions and trained with 100 epochs.
 
+To be released.
+
 # Checkpoints
 1. DDPM without conditions trained with 100 epochs on CIFAR10.
 
+To be released.
+
 2. DDPM with one-hot encoding class conditions and trained with 100 epochs on CIFAR10.
 
+To be released.
+
 3. DDPM with text embedding class conditions and trained with 100 epochs on CIFAR10.
+
+To be released.
