@@ -5,6 +5,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+import clip
+
 class EmbedFC(nn.Module):
     def __init__(self, input_dim, emb_dim):
         super(EmbedFC, self).__init__()
@@ -157,6 +159,23 @@ class NaiveUnet(nn.Module):
 class ContextUnet(nn.Module):
     def __init__(self, in_channels: int, out_channels: int, n_feat: int = 256, encoding: str = 'onehot', nc_feat: int = 10) -> None:
         super(ContextUnet, self).__init__()
+        if encoding == 'clip':
+            self.clip_model, _ = clip.load("ViT-B/32")
+            # freeze model
+            for param in self.clip_model.parameters():
+                param.requires_grad = False
+            # construct a codebook for CIFAR10
+            self.codebook = {0: 'a photo of an airplane',
+                             1: 'a photo of an automobile',
+                             2: 'a photo of a bird',
+                             3: 'a photo of a cat',
+                             4: 'a photo of a deer',
+                             5: 'a photo of a dog',
+                             6: 'a photo of a frog',
+                             7: 'a photo of a horse',
+                             8: 'a photo of a ship',
+                             9: 'a photo of a truck'
+                             }
         self.in_channels = in_channels
         self.out_channels = out_channels
 
@@ -200,11 +219,15 @@ class ContextUnet(nn.Module):
         Output:
         feature: torch tensor with shape (batch, number of features)
         '''
-
         if self.encoding == 'onehot':
-            vec = F.one_hot(label, self.nc_feat).float()
+            vec = F.one_hot(label, self.nc_feat).float() # (batch, 10)
         elif self.encoding == 'clip':
-            pass
+            text_batch = []
+            for l in label:
+                text_batch.append(self.codebook[int(l)])
+            text = clip.tokenize(text_batch).to(label)
+            with torch.no_grad():
+                vec = self.clip_model.encode_text(text) # (batch, 512)
         else:
             print("Encoding method not supported.")
             exit(-1)
