@@ -28,7 +28,7 @@ No preparation needed.
 Download your own images into ```./data``` and write your customized data loader.
 
 # Train
-Run the below commad. You can specify different models (NaiveUnet, ContextUnet) and hyperparamters inside.
+Run the below commad. You can specify different DDPM models (DDPM with NaiveUnet, DDPM with ContextUnet) and hyperparamters inside.
 ```
 python train.py
 ```
