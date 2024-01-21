@@ -227,7 +227,7 @@ class ContextUnet(nn.Module):
                 text_batch.append(self.codebook[int(l)])
             text = clip.tokenize(text_batch).to(label)
             with torch.no_grad():
-                vec = self.clip_model.encode_text(text) # (batch, 512)
+                vec = self.clip_model.encode_text(text).float() # (batch, 512)
         else:
             print("Encoding method not supported.")
             exit(-1)
