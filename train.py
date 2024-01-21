@@ -20,7 +20,8 @@ def train_cifar10(
 
     # uncomment to select one of below model
     #ddpm = DDPM(eps_model=NaiveUnet(3, 3, n_feat=128), betas=(1e-4, 0.02), n_T=1000)
-    ddpm = DDPM_Context(eps_model=ContextUnet(3, 3, n_feat=128, encoding='onehot', nc_feat=10), betas=(1e-4, 0.02), n_T=1000)
+    #ddpm = DDPM_Context(eps_model=ContextUnet(3, 3, n_feat=128, encoding='onehot', nc_feat=10), betas=(1e-4, 0.02), n_T=1000)
+    ddpm = DDPM_Context(eps_model=ContextUnet(3, 3, n_feat=128, encoding='clip', nc_feat=512), betas=(1e-4, 0.02), n_T=1000)
 
     if load_pth is not None:
         ddpm.load_state_dict(torch.load(load_pth))
@@ -68,7 +69,7 @@ def train_cifar10(
             save_image(grid, f"./contents/ddpm_sample_cifar_{i}.png")
 
             # save model
-            torch.save(ddpm.state_dict(), f"./models/ddpm_context_cifar.pth")
+            torch.save(ddpm.state_dict(), f"./models/ddpm_context_clip_cifar.pth")
 
 
 if __name__ == "__main__":

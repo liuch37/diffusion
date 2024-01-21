@@ -46,11 +46,11 @@ python inference.py
 
 2. DDPM 1000 steps CIFAR10 with one-hot encoding class conditions and trained with 100 epochs. The first to last row is conditioned on 'automobile', 'cat', 'dog', and 'ship', respectively.
 
-![Generated images](https://github.com/liuch37/diffusion/blob/main/misc/ddpm_sample_cifar_99_contextunet.png)
+![Generated images](https://github.com/liuch37/diffusion/blob/main/misc/ddpm_sample_cifar_99_contextunet_onehot.png)
 
-3. DDPM 1000 steps CIFAR10 with text embedding class conditions and trained with 100 epochs.
+3. DDPM 1000 steps CIFAR10 with text embedding class conditions and trained with 100 epochs. The first to last row is conditioned on 'automobile', 'cat', 'dog', and 'ship', respectively.
 
-To be released.
+![Generated images](https://github.com/liuch37/diffusion/blob/main/misc/ddpm_sample_cifar_99_contextunet_clip.png)
 
 # Checkpoints
 1. DDPM without conditions trained with 100 epochs on CIFAR10.

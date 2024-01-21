@@ -19,7 +19,8 @@ def inference(
 
     # uncomment to select one of below model
     #model = DDPM(eps_model=NaiveUnet(3, 3, n_feat=128), betas=(1e-4, 0.02), n_T=1000)
-    model = DDPM_Context(eps_model=ContextUnet(3, 3, n_feat=128, encoding='onehot', nc_feat=10), betas=(1e-4, 0.02), n_T=1000)
+    #model = DDPM_Context(eps_model=ContextUnet(3, 3, n_feat=128, encoding='onehot', nc_feat=10), betas=(1e-4, 0.02), n_T=1000)
+    model = DDPM_Context(eps_model=ContextUnet(3, 3, n_feat=128, encoding='clip', nc_feat=512), betas=(1e-4, 0.02), n_T=1000)
 
     model.load_state_dict(torch.load(load_path))
 
@@ -37,4 +38,4 @@ def inference(
 
 if __name__ == "__main__":
     os.makedirs('generations',exist_ok=True)
-    inference(save_path="./generations", samples=16, device="cuda", load_path="./models/ddpm_context_cifar.pth", sampler='ddpm')
+    inference(save_path="./generations", samples=16, device="cuda", load_path="./models/ddpm_context_clip_cifar.pth", sampler='ddpm')
