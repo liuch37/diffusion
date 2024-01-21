@@ -99,7 +99,7 @@ class DDPM_Context(nn.Module):
 
         x_i = torch.randn(n_sample, *size).to(device)  # x_T ~ N(0, 1)
         if c == None:
-            c = torch.randint(0, self.eps_model.nc_feat, (n_sample,)).to(device)
+            c = torch.randint(0, 10, (n_sample,)).to(device) # assume number of class is 10
         else:
             c = c.to(device)
 
