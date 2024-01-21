@@ -17,6 +17,7 @@ def inference(
     save_path: str = "./generations", samples: int = 8, device: str = "cuda:0", load_path: str = "ddpm.pth", sampler: str = 'ddpm'
 ) -> None:
 
+    # uncomment to select one of below model
     #model = DDPM(eps_model=NaiveUnet(3, 3, n_feat=128), betas=(1e-4, 0.02), n_T=1000)
     model = DDPM_Context(eps_model=ContextUnet(3, 3, n_feat=128, encoding='onehot', nc_feat=10), betas=(1e-4, 0.02), n_T=1000)
 

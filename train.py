@@ -18,6 +18,7 @@ def train_cifar10(
     n_epoch: int = 100, device: str = "cuda:0", load_pth: Optional[str] = None
 ) -> None:
 
+    # uncomment to select one of below model
     #ddpm = DDPM(eps_model=NaiveUnet(3, 3, n_feat=128), betas=(1e-4, 0.02), n_T=1000)
     ddpm = DDPM_Context(eps_model=ContextUnet(3, 3, n_feat=128, encoding='onehot', nc_feat=10), betas=(1e-4, 0.02), n_T=1000)
 
