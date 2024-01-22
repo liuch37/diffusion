@@ -53,14 +53,14 @@ python inference.py
 ![Generated images](https://github.com/liuch37/diffusion/blob/main/misc/ddpm_sample_cifar_99_contextunet_clip.png)
 
 # Checkpoints
-1. DDPM without conditions trained with 100 epochs on CIFAR10.
+1. DDPM without conditions (NaiveUnet) trained with 100 epochs on CIFAR10.
 
-To be released.
+https://drive.google.com/file/d/1e95Rkgb1DtvFPuyynMipOPprMcgrp99j/view?usp=sharing
 
-2. DDPM with one-hot encoding class conditions and trained with 100 epochs on CIFAR10.
+2. DDPM with one-hot encoding class conditions (ContextUnet) and trained with 100 epochs on CIFAR10.
 
-To be released.
+https://drive.google.com/file/d/1tK6a1mOisSM-holI8Ou3AFlX5MTzCr7i/view?usp=sharing
 
-3. DDPM with text embedding class conditions and trained with 100 epochs on CIFAR10.
+3. DDPM with text embedding class conditions (ContextUnet) and trained with 100 epochs on CIFAR10.
 
-To be released.
+https://drive.google.com/file/d/1OZwl_cjNqretPH-Azj3sMoYC4jFNt_Jc/view?usp=sharing
