@@ -65,7 +65,7 @@ def train_cifar10(
         with torch.no_grad():
             xh = ddpm.sample(8, (3, 32, 32), device)
             xset = torch.cat([xh, x[:8]], dim=0)
-            grid = make_grid(xset, normalize=True, range=(-1, 1), nrow=4) # different torchvision version can use 'value_range' instead of 'range'
+            grid = make_grid(xset, normalize=True, value_range=(-1, 1), nrow=4)
             save_image(grid, f"./contents/ddpm_sample_cifar_{i}.png")
 
             # save model

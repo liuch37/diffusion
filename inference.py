@@ -33,7 +33,7 @@ def inference(
                           5, 5, 5, 5,
                           8, 8, 8, 8]) # ['automobile', 'cat', 'dog', 'ship']
         xh = model.sample(samples, (3, 32, 32), device, c)
-        grid = make_grid(xh, normalize=True, range=(-1, 1), nrow=4) # different torchvision version can use 'value_range' instead of 'range'
+        grid = make_grid(xh, normalize=True, value_range=(-1, 1), nrow=4)
         save_image(grid, os.path.join(save_path, 'sample.png'))
 
 if __name__ == "__main__":
