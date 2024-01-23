@@ -59,6 +59,73 @@ class DDPM(nn.Module):
 
         return x_i
 
+class DDPM_Dual(nn.Module):
+    def __init__(
+        self,
+        eps_model: nn.Module,
+        rho: float,
+        input_shape: Tuple[int, int, int, int],
+        betas: Tuple[float, float],
+        n_T: int,
+        criterion: nn.Module = nn.MSELoss(),
+    ) -> None:
+        super(DDPM_Dual, self).__init__()
+        self.eps_model = eps_model
+        self.rho = rho # correlation coefficient
+
+        # noise generator
+        b, c, h, w = input_shape
+        one_size = b * c * h * w
+        cov = torch.ones(one_size, one_size) * self.rho \
+              + torch.eye(one_size) * (1 - self.rho) # covariance matrix: [[1, rho], [rho, 1]]
+        self.gen = torch.distributions.MultivariateNormal(torch.zeros(one_size), cov)
+
+        # register_buffer allows us to freely access these tensors by name. It helps device placement.
+        for k, v in ddpm_schedules(betas[0], betas[1], n_T).items():
+            self.register_buffer(k, v)
+
+        self.n_T = n_T
+        self.criterion = criterion
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Makes forward diffusion x_t, and tries to guess epsilon value from x_t using eps_model.
+        This implements Algorithm 1 in the paper.
+        """
+
+        _ts = torch.randint(1, self.n_T + 1, (x.shape[0],)).to(x.device) # t ~ Uniform(0, n_T)
+        eps = self.gen.sample() # generate samples
+        eps = eps.reshape_as(x)
+        eps1, eps2 = eps[:eps.shape[0]//2,], eps[eps.shape[0]//2:] # (eps1, eps2) ~ N(0, covariance)
+
+        x_t = (
+            self.sqrtab[_ts, None, None, None] * x
+            + self.sqrtmab[_ts, None, None, None] * eps
+        )  # This is the x_t, which is sqrt(alphabar) x_0 + sqrt(1-alphabar) * eps
+        # We should predict the "error term" from this x_t. Loss is what we return.
+
+        # noise prediction
+        y1, y2 = self.eps_model(x_t, _ts / self.n_T)
+
+        return self.criterion(eps1, y1) + self.criterion(eps2, y2)
+
+    def sample(self, n_sample: int, size, device) -> torch.Tensor:
+
+        x_i = torch.randn(n_sample, *size).to(device)  # x_T ~ N(0, 1)
+
+        # This samples accordingly to Algorithm 2. It is exactly the same logic.
+        for i in range(self.n_T, 0, -1):
+            z = torch.randn(n_sample, *size).to(device) if i > 1 else 0
+            eps = self.eps_model(
+                x_i, torch.tensor(i / self.n_T).to(device).repeat(n_sample, 1)
+            )
+            x_i = (
+                self.oneover_sqrta[i] * (x_i - eps * self.mab_over_sqrtmab[i])
+                + self.sqrt_beta_t[i] * z
+            )
+
+        return x_i
+
 class DDPM_Context(nn.Module):
     def __init__(
         self,
