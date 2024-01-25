@@ -62,23 +62,17 @@ class DDPM(nn.Module):
 class DDPM_Dual(nn.Module):
     def __init__(
         self,
-        eps_model: nn.Module,
+        eps_model1: nn.Module,
+        eps_model2: nn.Module,
         rho: float,
-        input_shape: Tuple[int, int, int, int],
         betas: Tuple[float, float],
         n_T: int,
         criterion: nn.Module = nn.MSELoss(),
     ) -> None:
         super(DDPM_Dual, self).__init__()
-        self.eps_model = eps_model
+        self.eps_model1 = eps_model1
+        self.eps_model2 = eps_model2
         self.rho = rho # correlation coefficient
-
-        # noise generator
-        b, c, h, w = input_shape
-        one_size = b * c * h * w
-        cov = torch.ones(one_size, one_size) * self.rho \
-              + torch.eye(one_size) * (1 - self.rho) # covariance matrix: [[1, rho], [rho, 1]]
-        self.gen = torch.distributions.MultivariateNormal(torch.zeros(one_size), cov)
 
         # register_buffer allows us to freely access these tensors by name. It helps device placement.
         for k, v in ddpm_schedules(betas[0], betas[1], n_T).items():
@@ -94,18 +88,25 @@ class DDPM_Dual(nn.Module):
         """
 
         _ts = torch.randint(1, self.n_T + 1, (x.shape[0],)).to(x.device) # t ~ Uniform(0, n_T)
-        eps = self.gen.sample() # generate samples
-        eps = eps.reshape_as(x)
-        eps1, eps2 = eps[:eps.shape[0]//2,], eps[eps.shape[0]//2:] # (eps1, eps2) ~ N(0, covariance)
+        eps1 = torch.randn_like(x)  # eps1 ~ N(0, 1)
+        n = torch.randn_like(x)  # n ~ N(0, 1)
+        eps2 = self.rho * eps1 + (1 - self.rho ** 2)**0.5 * n
 
-        x_t = (
+        x_t1 = (
             self.sqrtab[_ts, None, None, None] * x
-            + self.sqrtmab[_ts, None, None, None] * eps
+            + self.sqrtmab[_ts, None, None, None] * eps1
+        )  # This is the x_t, which is sqrt(alphabar) x_0 + sqrt(1-alphabar) * eps
+        # We should predict the "error term" from this x_t. Loss is what we return.
+
+        x_t2 = (
+            self.sqrtab[_ts, None, None, None] * x
+            + self.sqrtmab[_ts, None, None, None] * eps2
         )  # This is the x_t, which is sqrt(alphabar) x_0 + sqrt(1-alphabar) * eps
         # We should predict the "error term" from this x_t. Loss is what we return.
 
         # noise prediction
-        y1, y2 = self.eps_model(x_t, _ts / self.n_T)
+        y1 = self.eps_model1(x_t1, _ts / self.n_T)
+        y2 = self.eps_model2(x_t2, _ts / self.n_T)
 
         return self.criterion(eps1, y1) + self.criterion(eps2, y2)
 
