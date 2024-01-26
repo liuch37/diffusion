@@ -93,7 +93,7 @@ def train_dual(
         transform=tf,
     )
 
-    dataloader = DataLoader(dataset, batch_size=128, shuffle=True, num_workers=8)
+    dataloader = DataLoader(dataset, batch_size=256, shuffle=True, num_workers=8)
     optim = torch.optim.Adam(ddpm.parameters(), lr=1e-5)
     for i in range(n_epoch):
         print(f"Epoch {i} : ")
