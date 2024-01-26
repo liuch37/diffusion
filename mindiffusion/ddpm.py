@@ -81,25 +81,24 @@ class DDPM_Dual(nn.Module):
         self.n_T = n_T
         self.criterion = criterion
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x1: torch.Tensor, x2: torch.Tensor) -> torch.Tensor:
         """
         Makes forward diffusion x_t, and tries to guess epsilon value from x_t using eps_model.
         This implements Algorithm 1 in the paper.
         """
-
-        _ts = torch.randint(1, self.n_T + 1, (x.shape[0],)).to(x.device) # t ~ Uniform(0, n_T)
-        eps1 = torch.randn_like(x)  # eps1 ~ N(0, 1)
-        n = torch.randn_like(x)  # n ~ N(0, 1)
-        eps2 = self.rho * eps1 + (1 - self.rho ** 2)**0.5 * n
+        _ts = torch.randint(1, self.n_T + 1, (x1.shape[0],)).to(x1.device) # t ~ Uniform(0, n_T)
+        eps1 = torch.randn_like(x1)  # eps1 ~ N(0, 1)
+        n = torch.randn_like(x1)  # n ~ N(0, 1)
+        eps2 = self.rho * eps1 + (1 - self.rho ** 2)**0.5 * n # eps2 ~ N(0, R)
 
         x_t1 = (
-            self.sqrtab[_ts, None, None, None] * x
+            self.sqrtab[_ts, None, None, None] * x1
             + self.sqrtmab[_ts, None, None, None] * eps1
         )  # This is the x_t, which is sqrt(alphabar) x_0 + sqrt(1-alphabar) * eps
         # We should predict the "error term" from this x_t. Loss is what we return.
 
         x_t2 = (
-            self.sqrtab[_ts, None, None, None] * x
+            self.sqrtab[_ts, None, None, None] * x2
             + self.sqrtmab[_ts, None, None, None] * eps2
         )  # This is the x_t, which is sqrt(alphabar) x_0 + sqrt(1-alphabar) * eps
         # We should predict the "error term" from this x_t. Loss is what we return.
@@ -113,19 +112,29 @@ class DDPM_Dual(nn.Module):
     def sample(self, n_sample: int, size, device) -> torch.Tensor:
 
         x_i = torch.randn(n_sample, *size).to(device)  # x_T ~ N(0, 1)
+        n = torch.randn_like(x_i)  # n ~ N(0, 1)
+        x_i_dual = self.rho * x_i + (1 - self.rho ** 2)**0.5 * n # x_T_dual ~ N(0, 1)
 
         # This samples accordingly to Algorithm 2. It is exactly the same logic.
         for i in range(self.n_T, 0, -1):
             z = torch.randn(n_sample, *size).to(device) if i > 1 else 0
-            eps = self.eps_model(
+            z_dual = torch.randn(n_sample, *size).to(device) if i > 1 else 0
+            eps1 = self.eps_model1(
                 x_i, torch.tensor(i / self.n_T).to(device).repeat(n_sample, 1)
             )
+            eps2 = self.eps_model2(
+                x_i_dual, torch.tensor(i / self.n_T).to(device).repeat(n_sample, 1)
+            )
             x_i = (
-                self.oneover_sqrta[i] * (x_i - eps * self.mab_over_sqrtmab[i])
+                self.oneover_sqrta[i] * (x_i - eps1 * self.mab_over_sqrtmab[i])
                 + self.sqrt_beta_t[i] * z
             )
+            x_i_dual = (
+                self.oneover_sqrta[i] * (x_i_dual - eps2 * self.mab_over_sqrtmab[i])
+                + self.sqrt_beta_t[i] * z_dual
+            )
 
-        return x_i
+        return x_i, x_i_dual
 
 class DDPM_Context(nn.Module):
     def __init__(
