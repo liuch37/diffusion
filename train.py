@@ -119,10 +119,10 @@ def train_dual(
             xh, xh_dual = ddpm.sample(8, (3, 32, 32), device)
             xset = torch.cat([xh, xh_dual], dim=0)
             grid = make_grid(xset, normalize=True, value_range=(-1, 1), nrow=4)
-            save_image(grid, f"./contents/ddpm_sample_dual_{i}.png")
+            save_image(grid, f"./contents/ddpm_sample_dual__cifar_{i}.png")
 
             # save model
-            torch.save(ddpm.state_dict(), f"./models/ddpm_dual.pth")
+            torch.save(ddpm.state_dict(), f"./models/ddpm_dual_cifar.pth")
 
 if __name__ == "__main__":
     os.makedirs('contents',exist_ok=True)
