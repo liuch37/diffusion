@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
-from torchvision.datasets import CIFAR10
+from torchvision.datasets import CIFAR10, MovingMNIST
 from torchvision import transforms
 from torchvision.utils import save_image, make_grid
 
@@ -86,9 +86,8 @@ def train_dual(
         [transforms.ToTensor(), transforms.Resize((32, 32)), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
 
-    dataset = CIFAR10(
+    dataset = MovingMNIST(
         "./data",
-        train=True,
         download=True,
         transform=tf,
     )
