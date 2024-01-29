@@ -56,6 +56,10 @@ python inference.py
 
 ![Generated images](https://github.com/liuch37/diffusion/blob/experiments/misc/ddpm_sample_cifar_99_naiveunet_dual.png)
 
+5. Dual DDPM 1000 steps MotionMNIST without conditions and trained with 100 epochs. The first two rows and last two rows are paired results using correlation coefficient 0.99.
+
+![Generated images](https://github.com/liuch37/diffusion/blob/experiments/misc/ddpm_sample_mnist_99_naiveunet_dual.png)
+
 
 # Checkpoints
 1. DDPM without conditions (NaiveUnet) trained with 100 epochs on CIFAR10.
