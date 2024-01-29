@@ -54,7 +54,7 @@ python inference.py
 
 4. Dual DDPM 1000 steps CIFAR10 without conditions and trained with 100 epochs. The first two rows and last two rows are paired results using correlation coefficient 0.99.
 
-![Generated images](https://github.com/liuch37/diffusion/blob/main/misc/ddpm_sample_cifar_99_naivenet_dual.png)
+![Generated images](https://github.com/liuch37/diffusion/blob/experiments/misc/ddpm_sample_cifar_99_naiveunet_dual.png)
 
 
 # Checkpoints
