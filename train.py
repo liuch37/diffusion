@@ -75,7 +75,7 @@ def train_dual(
     n_epoch: int = 100, device: str = "cuda:0", load_pth: Optional[str] = None
 ) -> None:
 
-    ddpm = DDPM_Dual(eps_model1=NaiveUnet(3, 3, n_feat=128), eps_model2=NaiveUnet(3, 3, n_feat=128), rho=0.7, betas=(1e-4, 0.02), n_T=1000)
+    ddpm = DDPM_Dual(eps_model1=NaiveUnet(3, 3, n_feat=128), eps_model2=NaiveUnet(3, 3, n_feat=128), rho=0.99, betas=(1e-4, 0.02), n_T=1000)
 
     if load_pth is not None:
         ddpm.load_state_dict(torch.load(load_pth))
